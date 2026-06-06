@@ -1,0 +1,17 @@
+cluster.name: rag-cluster
+node.name: rag-node
+path.data: /usr/share/opensearch/data
+path.logs: /usr/share/opensearch/logs
+
+network.host: 0.0.0.0
+http.port: 9200
+transport.port: 9600
+
+discovery.type: single-node
+
+# k-NN plugin configuration
+plugins.security.disabled: true
+
+# k-NN settings
+index.knn.algo_param.ef_search: 512
+index.knn.memory_limit: 50%

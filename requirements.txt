@@ -1,0 +1,35 @@
+# Core
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# OpenSearch
+opensearch-py==2.4.2
+
+# Document Parsing
+unstructured[pdf,docx]==0.12.0
+pdf2image==1.17.0
+pypdf==3.17.4
+python-magic-bin==0.4.14
+markdown==3.5.1
+
+# Embeddings & ML
+sentence-transformers==2.2.2
+torch==2.1.2
+transformers==4.36.2
+accelerate==0.25.0
+bitsandbytes==0.41.3
+
+# LangChain Integration
+langchain-core==0.1.9
+langchain-community==0.0.14
+
+# CDC / File Watching
+watchdog==3.0.0
+
+# Utilities
+loguru==0.7.2
+tqdm==4.66.1
+numpy==1.26.2
+tenacity==8.2.3
+orjson==3.9.10

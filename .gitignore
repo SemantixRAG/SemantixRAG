@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Environment
+.env
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker/data/
+
+# Generated files
+*.pdf
+*.docx
+*.csv
+!documents/sample_document.md
+
+# Pytest
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Byte-compiled
+*.so
+*.pyd
