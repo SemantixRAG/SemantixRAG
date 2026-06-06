@@ -1,6 +1,16 @@
-# Production-Grade RAG Ingestion Pipeline
+# SemantixRAG — Production-Grade RAG Ingestion Pipeline
+
+[![GitHub](https://img.shields.io/badge/GitHub-SemantixRAG-6c5ce7?style=flat&logo=github)](https://github.com/SemantixRAG/SemantixRAG)
+[![License: MIT](https://img.shields.io/badge/License-MIT-00e676?style=flat)](https://opensource.org/licenses/MIT)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-00e5ff?style=flat&logo=python)](https://python.org)
 
 A robust, production-ready Retrieval-Augmented Generation (RAG) ingestion pipeline that preserves document structure during extraction, uses semantic chunking, and implements hybrid search indexing with OpenSearch.
+
+**🌐 Website:** [semantixrag.github.io](https://SemantixRAG.github.io)  
+**📦 GitHub:** [github.com/SemantixRAG/SemantixRAG](https://github.com/SemantixRAG/SemantixRAG)  
+**📖 License:** MIT
+
+---
 
 ## Architecture
 
@@ -33,7 +43,7 @@ A robust, production-ready Retrieval-Augmented Generation (RAG) ingestion pipeli
 ## Project Structure
 
 ```
-rag_ingestion/
+SemantixRAG/
 ├── config/
 │   ├── __init__.py
 │   └── settings.py             # Pydantic settings from .env
@@ -76,12 +86,20 @@ rag_ingestion/
 ├── .env                        # Environment variables
 ├── main.py                     # CLI entry point
 ├── requirements.txt            # Python dependencies
-└── README.md
+├── README.md
+└── index.html                  # Project landing page
 ```
 
 ## Quick Start
 
-### 1. Start OpenSearch
+### 1. Clone & Setup
+
+```bash
+git clone https://github.com/SemantixRAG/SemantixRAG.git
+cd SemantixRAG
+```
+
+### 2. Start OpenSearch
 
 ```bash
 cd docker
@@ -92,7 +110,7 @@ This starts:
 - **OpenSearch** on `localhost:9200` (k-NN plugin enabled)
 - **OpenSearch Dashboards** on `localhost:5601`
 
-### 2. Install Python Dependencies
+### 3. Install Python Dependencies
 
 ```bash
 python -m venv .venv
@@ -102,13 +120,13 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### 3. Initialize the Index
+### 4. Initialize the Index
 
 ```bash
 python main.py init
 ```
 
-### 4. Ingest Documents
+### 5. Ingest Documents
 
 ```bash
 # Ingest a single file
@@ -118,20 +136,20 @@ python main.py ingest ./documents/sample_document.md
 python main.py ingest ./documents/
 ```
 
-### 5. Search
+### 6. Search
 
 ```bash
 python main.py search "machine learning"
 python main.py search "supervised learning" --top-k 10
 ```
 
-### 6. Watch for Changes (CDC)
+### 7. Watch for Changes (CDC)
 
 ```bash
 python main.py watch ./documents/
 ```
 
-### 7. Check Statistics
+### 8. Check Statistics
 
 ```bash
 python main.py stats
@@ -197,6 +215,10 @@ All settings are configurable via environment variables (`.env` file):
 | Orphaned chunks | Contextual enrichment (title+summary in every chunk) |
 | Indexing bottlenecks | Batch processing, async decoupling |
 
+## Contributing
+
+Contributions are welcome! Please open an issue or pull request on [GitHub](https://github.com/SemantixRAG/SemantixRAG).
+
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.
