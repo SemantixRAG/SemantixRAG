@@ -3,13 +3,13 @@ version: '3.8'
 services:
   opensearch:
     image: opensearchproject/opensearch:2.11.1
-    container_name: rag-opensearch
+    container_name: semantix-opensearch
     environment:
-      - cluster.name=rag-cluster
-      - node.name=rag-node
+      - cluster.name=semantix-cluster
+      - node.name=semantix-node
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms4g -Xmx4g"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
       - "DISABLE_SECURITY_PLUGIN=true"
       - DISABLE_INSTALL_DEMO_CONFIG=true
       - plugins.security.disabled=true
@@ -24,14 +24,14 @@ services:
       - "9200:9200"
       - "9600:9600"
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - opensearch_data:/usr/share/opensearch/data
       - ./opensearch.yml:/usr/share/opensearch/config/opensearch.yml
     networks:
-      - rag-network
+      - semantix
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.11.1
-    container_name: rag-opensearch-dashboards
+    container_name: semantix-dashboards
     environment:
       - OPENSEARCH_HOSTS=http://opensearch:9200
       - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
@@ -40,12 +40,51 @@ services:
     depends_on:
       - opensearch
     networks:
-      - rag-network
+      - semantix
+
+  neo4j:
+    image: neo4j:5.15
+    container_name: semantix-neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - semantix
+
+  redis:
+    image: redis:7-alpine
+    container_name: semantix-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - semantix
+
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: semantix-opa
+    command: run --server --addr=:8181 /config
+    ports:
+      - "8181:8181"
+    volumes:
+      - ../config/opa:/config:ro
+    networks:
+      - semantix
 
 volumes:
-  opensearch-data:
+  opensearch_data:
+    driver: local
+  neo4j_data:
+    driver: local
+  redis_data:
     driver: local
 
 networks:
-  rag-network:
+  semantix:
     driver: bridge

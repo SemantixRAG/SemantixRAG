@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SemantixRAG — Production-Grade RAG Ingestion Pipeline</title>
+    <title>SemantixRAG — Production-Grade AI-Native Data Platform</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,8 +30,10 @@
             --accent-glow: rgba(0, 229, 255, 0.2);
             --success: #00e676;
             --warning: #ffd54f;
+            --danger: #ff5f57;
             --gradient-1: linear-gradient(135deg, #6c5ce7 0%, #a78bfa 100%);
             --gradient-2: linear-gradient(135deg, #00e5ff 0%, #7c3aed 100%);
+            --gradient-3: linear-gradient(135deg, #00e676 0%, #00e5ff 100%);
             --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: 'Fira Code', monospace;
             --radius: 16px;
@@ -218,6 +220,9 @@
         .flow-step:nth-child(2) .step-icon { background: rgba(0,229,255,0.12); color: #00e5ff; }
         .flow-step:nth-child(3) .step-icon { background: rgba(0,230,118,0.12); color: #00e676; }
         .flow-step:nth-child(4) .step-icon { background: rgba(255,213,79,0.15); color: #ffd54f; }
+        .flow-step:nth-child(5) .step-icon { background: rgba(255,95,87,0.15); color: #ff5f57; }
+        .flow-step:nth-child(6) .step-icon { background: rgba(108,92,231,0.12); color: #a78bfa; }
+        .flow-step:nth-child(7) .step-icon { background: rgba(0,229,255,0.12); color: #00e5ff; }
         .flow-step h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
         .flow-step p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
         .flow-step .step-num {
@@ -227,6 +232,24 @@
             font-size: 0.75rem; font-weight: 700;
         }
         .flow-arrow { display: flex; align-items: center; color: var(--border); font-size: 1.5rem; padding: 0 4px; }
+
+        .arch-diagram {
+            margin-top: 48px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            overflow-x: auto;
+        }
+        .arch-diagram pre {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+        .arch-diagram pre .highlight { color: var(--accent); }
+        .arch-diagram pre .primary { color: #a78bfa; }
+        .arch-diagram pre .success { color: var(--success); }
 
         .features { padding: 100px 0; background: rgba(17, 20, 42, 0.4); }
         .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
@@ -249,6 +272,11 @@
             background: rgba(108, 92, 231, 0.1); color: var(--primary);
             border: 1px solid rgba(108, 92, 231, 0.2);
         }
+        .feature-card .tag-new {
+            background: rgba(0, 230, 118, 0.1);
+            color: var(--success);
+            border-color: rgba(0, 230, 118, 0.3);
+        }
 
         .techstack { padding: 100px 0; }
         .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
@@ -261,12 +289,19 @@
         .tech-item i { font-size: 2rem; margin-bottom: 12px; display: block; }
         .tech-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
         .tech-item p { font-size: 0.75rem; color: var(--text-muted); }
+        .tech-item .new-badge {
+            display: inline-block;
+            font-size: 0.6rem; font-weight: 700;
+            background: var(--success); color: var(--bg);
+            padding: 2px 8px; border-radius: 100px;
+            margin-top: 6px;
+        }
 
         .cli-demo { padding: 100px 0; background: rgba(17, 20, 42, 0.4); }
         .terminal {
             background: #0a0b17; border: 1px solid var(--border);
             border-radius: var(--radius); overflow: hidden;
-            max-width: 720px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 780px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         .terminal-header {
             display: flex; align-items: center; gap: 8px;
@@ -353,16 +388,16 @@
         <div class="container">
             <div class="hero-badge">
                 <i class="fas fa-code-branch"></i>
-                Open Source &mdash; MIT Licensed
+                Open Source &mdash; MIT Licensed &mdash; v2.0.0
             </div>
             <h1>
                 <span class="glow-text">SemantixRAG</span><br />
-                Production-Grade RAG Ingestion Pipeline
+                AI-Native Data Platform
             </h1>
             <p>
-                End-to-end document ingestion for Retrieval-Augmented Generation.
-                Structure-preserving extraction, semantic chunking, LLM enrichment,
-                and hybrid search with OpenSearch &mdash; all in one elegant pipeline.
+                Production-grade RAG ingestion, knowledge graphs, AI observability,
+                automated compliance, and multi-modal extraction &mdash;
+                all in one elegant, open-source platform. No cloud lock-in.
             </p>
             <div class="hero-actions">
                 <a href="#quickstart" class="btn btn-primary">
@@ -377,11 +412,11 @@
             </div>
             <div class="hero-stats">
                 <div class="hero-stat">
-                    <div class="hero-stat-number">5</div>
-                    <div class="hero-stat-label">Pipeline Phases</div>
+                    <div class="hero-stat-number">10</div>
+                    <div class="hero-stat-label">Pipeline Stages</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">17+</div>
+                    <div class="hero-stat-number">33+</div>
                     <div class="hero-stat-label">Python Modules</div>
                 </div>
                 <div class="hero-stat">
@@ -389,8 +424,8 @@
                     <div class="hero-stat-label">Search Strategies</div>
                 </div>
                 <div class="hero-stat">
-                    <div class="hero-stat-number">Zero</div>
-                    <div class="hero-stat-label">Cloud Dependency</div>
+                    <div class="hero-stat-number">3</div>
+                    <div class="hero-stat-label">P0 Products</div>
                 </div>
             </div>
         </div>
@@ -399,38 +434,68 @@
     <section id="architecture" class="architecture">
         <div class="container">
             <div class="section-header fade-in">
-                <span class="section-label"><i class="fas fa-sitemap"></i> Pipeline</span>
+                <span class="section-label"><i class="fas fa-sitemap"></i> Platform</span>
                 <h2>End-to-End Architecture</h2>
-                <p>From raw documents to searchable vector embeddings in five well-defined phases.</p>
+                <p>From raw documents to AI-powered retrieval with observability, compliance, and knowledge graphs built in.</p>
             </div>
             <div class="flow fade-in">
                 <div class="flow-step">
                     <span class="step-num">1</span>
                     <div class="step-icon"><i class="fas fa-file-alt"></i></div>
                     <h3>Extraction</h3>
-                    <p>Parse PDFs, DOCX, HTML with Unstructured.io. VLM fallback for complex tables.</p>
+                    <p>PDFs, DOCX, HTML, images, audio, video. Unstructured.io + VLM + Whisper for multi-modal parsing.</p>
                 </div>
                 <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
                 <div class="flow-step">
                     <span class="step-num">2</span>
                     <div class="step-icon"><i class="fas fa-layer-group"></i></div>
                     <h3>Chunking</h3>
-                    <p>Header-aware splitter preserves document hierarchy. Configurable token limits.</p>
+                    <p>Header-aware splitter preserves document hierarchy. Configurable token limits with overlap.</p>
                 </div>
                 <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
                 <div class="flow-step">
                     <span class="step-num">3</span>
                     <div class="step-icon"><i class="fas fa-magic"></i></div>
                     <h3>Enrichment</h3>
-                    <p>LLM generates summaries. Title + context prepended to every chunk.</p>
+                    <p>LLM summaries + entity extraction (NER) + PII scanning (GuardRail). Context prepended to every chunk.</p>
                 </div>
                 <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
                 <div class="flow-step">
                     <span class="step-num">4</span>
                     <div class="step-icon"><i class="fas fa-database"></i></div>
-                    <h3>Indexing</h3>
-                    <p>BGE-m3 embeddings + bulk index into OpenSearch. k-NN + BM25 hybrid search.</p>
+                    <h3>Embedding</h3>
+                    <p>BGE-m3 dense vectors + JinaCLIP images + CLAP audio. HNSW index in OpenSearch k-NN.</p>
                 </div>
+                <div class="flow-arrow"><i class="fas fa-chevron-right"></i></div>
+                <div class="flow-step">
+                    <span class="step-num">5</span>
+                    <div class="step-icon"><i class="fas fa-project-diagram"></i></div>
+                    <h3>GraphRAG</h3>
+                    <p>Entities extracted → Neo4j knowledge graph. Multi-hop graph traversal + hybrid search fusion.</p>
+                </div>
+            </div>
+
+            <div class="arch-diagram fade-in">
+                <pre>
+┌────────────────────────────────────────────────────────────────────────────┐
+│                           SemantixRAG Platform v2.0                        │
+├────────────────────────────────────────────────────────────────────────────┤
+│  API Gateway (FastAPI)  ───  OPA Policy Engine ───  AuthZ & Rate Limiting  │
+├────────────────────────────────────────────────────────────────────────────┤
+│  Core Pipeline:                                                            │
+│    Extraction → Chunking → Enrichment → Embedding → Indexing               │
+│       │             │            │            │          │                 │
+│       │  VLM/Whisper│  Header    │  LLM Summ. │  BGE-m3  │  OpenSearch     │
+│       │  Multi-modal│  Splitter  │  Entity    │  JinaCLIP│  Neo4j Graph    │
+│       │             │            │  PII Scan  │  CLAP    │  (GraphRAG)     │
+├────────────────────────────────────────────────────────────────────────────┤
+│  <span class="primary">Obsidian</span>  │  <span class="success">GuardRail</span>  │  <span class="highlight">GraphRAG</span>  │  <span class="highlight">CostSentinel</span>  │  <span class="highlight">AdminCopilot</span>     │
+│  Tracing   │  PII Detect │  Entity    │  Cost Track │  NL Admin            │
+│  Metrics   │  Masking    │  KG Write │  Optimize   │  Auto Config          │
+│  Eval      │  DSAR       │  Graph    │  Budget     │  Reports              │
+│  Alerting  │  Audit      │  Search   │  Forecast   │  Incident             │
+└────────────────────────────────────────────────────────────────────────────┘
+                </pre>
             </div>
         </div>
     </section>
@@ -439,56 +504,80 @@
         <div class="container">
             <div class="section-header fade-in">
                 <span class="section-label"><i class="fas fa-star"></i> Capabilities</span>
-                <h2>Why SemantixRAG?</h2>
-                <p>Every feature is designed to solve real-world RAG ingestion challenges.</p>
+                <h2>AI-Native Platform Features</h2>
+                <p>Every feature designed for production RAG workloads with enterprise governance.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#00e5ff;"><i class="fas fa-binoculars"></i></div>
+                    <h3>Obsidian &mdash; AI Observability</h3>
+                    <p>End-to-end distributed tracing for every pipeline stage. RAG quality metrics (faithfulness, MRR, Recall@k), latency histograms, cost attribution, and drift detection.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>Traces</span><span>Metrics</span><span>Eval Harness</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#00e676;"><i class="fas fa-project-diagram"></i></div>
+                    <h3>GraphRAG &mdash; Knowledge Graphs</h3>
+                    <p>Automatic entity extraction (spaCy + LLM) → Neo4j knowledge graph. Multi-hop graph traversal fused with vector search via RRF for entity-aware retrieval.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>Neo4j</span><span>NER</span><span>Graph Search</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#ffd54f;"><i class="fas fa-shield-alt"></i></div>
+                    <h3>GuardRail &mdash; Auto Compliance</h3>
+                    <p>Real-time PII detection via Presidio + regex fallback. Dynamic masking, GDPR DSAR automation (find/delete/export), OPA policy engine, and immutable audit trails.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>PII Scan</span><span>DSAR</span><span>OPA</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#a78bfa;"><i class="fas fa-image"></i></div>
+                    <h3>Multi-Modal RAG</h3>
+                    <p>Extract text from images (VLM), transcribe audio (Whisper), sample video frames. Unified embedding space via JinaCLIP + CLAP for cross-modal retrieval.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>Images</span><span>Audio</span><span>Video</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon"><i class="fas fa-code"></i></div>
+                    <h3>FastAPI REST Server</h3>
+                    <p>Production-grade API with 5 route modules: ingestion, retrieval, compliance, observability, and admin. OpenAPI docs, CORS, async handlers, file upload.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>REST</span><span>OpenAPI</span><span>Async</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#ff5f57;"><i class="fas fa-dollar-sign"></i></div>
+                    <h3>CostSentinel &mdash; Cost Intel</h3>
+                    <p>Per-pipeline cost tracking, anomaly detection, optimization recommendations, model routing intelligence, and budget guardrails with hard-stop enforcement.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>FinOps</span><span>Budget</span><span>Forecast</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon" style="color:#00e5ff;"><i class="fas fa-robot"></i></div>
+                    <h3>AdminCopilot &mdash; NL Admin</h3>
+                    <p>Natural-language platform administration. "Why is ingestion failing?", "Show PII findings", "Schema status" &mdash; managed via conversational interface.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>NL Queries</span><span>Auto-diagnose</span></div>
+                </div>
+                <div class="feature-card fade-in">
                     <div class="fc-icon"><i class="fas fa-structure"></i></div>
                     <h3>Structure-Preserving Extraction</h3>
-                    <p>Documents are parsed with full structural fidelity. Headers, tables, lists, and figures are extracted with their relationships intact &mdash; not just flat text.</p>
+                    <p>Documents parsed with full structural fidelity. Headers, tables, lists, figures extracted with relationships intact &mdash; not flat text.</p>
                     <div class="feature-tags"><span>Unstructured.io</span><span>PyMuPDF</span><span>Element Mapping</span></div>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="fc-icon"><i class="fas fa-table"></i></div>
-                    <h3>Smart Table Fallback</h3>
-                    <p>When standard OCR fails on complex tables, page images are routed to a Vision-Language Model (LLaVA / ColPali) that returns perfect Markdown tables.</p>
-                    <div class="feature-tags"><span>VLM</span><span>Ollama</span><span>Markdown</span></div>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="fc-icon"><i class="fas fa-scissors"></i></div>
-                    <h3>Header-Aware Chunking</h3>
-                    <p>Paragraphs are grouped under their parent headers. The chunker respects document hierarchy, preventing orphaned sentences that lose semantic meaning.</p>
-                    <div class="feature-tags"><span>Semantic Boundaries</span><span>Overlap</span><span>Configurable</span></div>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="fc-icon"><i class="fas fa-file-signature"></i></div>
-                    <h3>Contextual Enrichment</h3>
-                    <p>Every chunk gets the document title and an LLM-generated summary prepended. This prevents the "lost in the middle" problem during retrieval.</p>
-                    <div class="feature-tags"><span>Gemma</span><span>Llama</span><span>Ollama</span></div>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="fc-icon"><i class="fas fa-vector-square"></i></div>
-                    <h3>BGE-m3 Embeddings</h3>
-                    <p>State-of-the-art multi-lingual dense embeddings via HuggingFace sentence-transformers. Auto-detects CUDA, MPS, or CPU. Graceful mock fallback.</p>
-                    <div class="feature-tags"><span>1024-dim</span><span>Multi-lingual</span><span>Normalized</span></div>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="fc-icon"><i class="fas fa-search"></i></div>
                     <h3>Hybrid Search (k-NN + BM25)</h3>
-                    <p>Combines dense vector search with traditional keyword search via Reciprocal Rank Fusion. Catches both semantic similarity and exact keyword matches.</p>
-                    <div class="feature-tags"><span>HNSW</span><span>Cosine Similarity</span><span>RRF</span></div>
+                    <p>Dense vector + keyword search fused via Reciprocal Rank Fusion. HNSW ANN with cosine similarity. Configurable top-k and reranking pipeline.</p>
+                    <div class="feature-tags"><span>HNSW</span><span>RRF</span><span>Cross-encoder</span></div>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="fc-icon"><i class="fas fa-sync-alt"></i></div>
                     <h3>CDC & Incremental Updates</h3>
-                    <p>Python Watchdog monitors directories for file changes. When a document is updated, old chunks are deleted and the document is re-indexed automatically.</p>
+                    <p>Python Watchdog monitors directories. File changes trigger automatic re-indexing with old chunk deletion. Batch processing with progress reporting.</p>
                     <div class="feature-tags"><span>Watchdog</span><span>Auto-sync</span><span>Delete-by-ID</span></div>
+                </div>
+                <div class="feature-card fade-in">
+                    <div class="fc-icon"><i class="fas fa-check-circle"></i></div>
+                    <h3>CI/CD & Testing</h3>
+                    <p>GitHub Actions workflows for lint, unit tests (41+), integration tests, security scanning (Trivy), Docker build. OpenSearch + Neo4j service containers.</p>
+                    <div class="feature-tags"><span class="tag-new">NEW</span><span>GitHub Actions</span><span>Trivy</span></div>
                 </div>
                 <div class="feature-card fade-in">
                     <div class="fc-icon"><i class="fas fa-box-open"></i></div>
                     <h3>100% Local & Open Source</h3>
-                    <p>Zero cloud dependencies. Everything runs on your hardware with Docker. Embedding models and LLMs run locally via Ollama or HuggingFace.</p>
+                    <p>Zero cloud dependencies. Everything runs on your hardware with Docker. Embedding models and LLMs run locally via Ollama or HuggingFace. MIT licensed.</p>
                     <div class="feature-tags"><span>MIT License</span><span>Docker</span><span>Self-hosted</span></div>
                 </div>
             </div>
@@ -500,7 +589,7 @@
             <div class="section-header fade-in">
                 <span class="section-label"><i class="fas fa-microchip"></i> Stack</span>
                 <h2>Technology Stack</h2>
-                <p>Battle-tested tools for production RAG workloads.</p>
+                <p>Battle-tested tools for production AI workloads.</p>
             </div>
             <div class="tech-grid fade-in">
                 <div class="tech-item">
@@ -519,29 +608,54 @@
                     <p>Vector store + BM25 search</p>
                 </div>
                 <div class="tech-item">
+                    <i style="color:#00e676;"><i class="fas fa-project-diagram"></i></i>
+                    <h4>Neo4j</h4>
+                    <p>Knowledge graph + GraphRAG</p>
+                    <span class="new-badge">NEW</span>
+                </div>
+                <div class="tech-item">
                     <i style="color:#ff6b6b;"><i class="fas fa-file-pdf"></i></i>
                     <h4>Unstructured.io</h4>
                     <p>Document parsing engine</p>
                 </div>
                 <div class="tech-item">
-                    <i style="color:#00e676;"><i class="fas fa-robot"></i></i>
+                    <i style="color:#00e5ff;"><i class="fas fa-robot"></i></i>
                     <h4>BGE-m3</h4>
                     <p>Dense embeddings (1024 dim)</p>
                 </div>
                 <div class="tech-item">
-                    <i style="color:#a78bfa;"><i class="fas fa-magic"></i></i>
-                    <h4>LLaVA / Gemma</h4>
-                    <p>VLM + LLM enrichment</p>
+                    <i style="color:#ffd54f;"><i class="fas fa-bolt"></i></i>
+                    <h4>FastAPI</h4>
+                    <p>REST API server</p>
+                    <span class="new-badge">NEW</span>
                 </div>
                 <div class="tech-item">
-                    <i style="color:#ffd54f;"><i class="fas fa-eye"></i></i>
-                    <h4>Watchdog</h4>
-                    <p>File system monitoring</p>
+                    <i style="color:#a78bfa;"><i class="fas fa-magic"></i></i>
+                    <h4>LLaVA / Whisper</h4>
+                    <p>Multi-modal VLM + audio</p>
+                    <span class="new-badge">NEW</span>
+                </div>
+                <div class="tech-item">
+                    <i style="color:#ff5f57;"><i class="fas fa-shield-alt"></i></i>
+                    <h4>Presidio / OPA</h4>
+                    <p>PII detection + policy engine</p>
+                    <span class="new-badge">NEW</span>
+                </div>
+                <div class="tech-item">
+                    <i style="color:#ffbd2e;"><i class="fas fa-chart-line"></i></i>
+                    <h4>Grafana</h4>
+                    <p>Dashboard & alerting</p>
                 </div>
                 <div class="tech-item">
                     <i style="color:#74b9ff;"><i class="fas fa-cog"></i></i>
                     <h4>Pydantic</h4>
                     <p>Data validation & settings</p>
+                </div>
+                <div class="tech-item">
+                    <i style="color:#28c840;"><i class="fas fa-vial"></i></i>
+                    <h4>Pytest</h4>
+                    <p>41+ unit & integration tests</p>
+                    <span class="new-badge">NEW</span>
                 </div>
             </div>
         </div>
@@ -551,42 +665,50 @@
         <div class="container">
             <div class="section-header fade-in">
                 <span class="section-label"><i class="fas fa-terminal"></i> Quick Start</span>
-                <h2>From Zero to Search in 5 Commands</h2>
-                <p>Get the pipeline running on your machine in minutes.</p>
+                <h2>From Zero to AI in 5 Commands</h2>
+                <p>Get the full platform running on your machine in minutes.</p>
             </div>
             <div class="terminal fade-in">
                 <div class="terminal-header">
                     <span class="terminal-dot"></span>
                     <span class="terminal-dot"></span>
                     <span class="terminal-dot"></span>
-                    <span class="terminal-title">SemantixRAG</span>
+                    <span class="terminal-title">SemantixRAG v2.0</span>
                 </div>
                 <div class="terminal-body">
                     <span class="comment"># 1. Clone the repo</span><br />
                     <span class="prompt">$</span> <span class="cmd">git clone https://github.com/SemantixRAG/SemantixRAG.git</span><br />
                     <span class="prompt">$</span> <span class="cmd">cd SemantixRAG</span><br /><br />
 
-                    <span class="comment"># 2. Start OpenSearch (k-NN enabled)</span><br />
-                    <span class="prompt">$</span> <span class="cmd">cd docker && docker-compose up -d</span><br />
-                    <span class="output">✔ Container rag-opensearch  Started</span><br />
-                    <span class="output">✔ Container rag-opensearch-dashboards  Started</span><br /><br />
+                    <span class="comment"># 2. Start infrastructure (OpenSearch, Neo4j, Redis, OPA)</span><br />
+                    <span class="prompt">$</span> <span class="cmd">docker-compose -f docker/docker-compose.yml up -d</span><br />
+                    <span class="output">✔ Starting semantix-opensearch  ... done</span><br />
+                    <span class="output">✔ Starting semantix-neo4j      ... done</span><br />
+                    <span class="output">✔ Starting semantix-redis      ... done</span><br />
+                    <span class="output">✔ Starting semantix-opa        ... done</span><br /><br />
 
                     <span class="comment"># 3. Install Python dependencies</span><br />
                     <span class="prompt">$</span> <span class="cmd">pip install -r requirements.txt</span><br />
-                    <span class="output">✔ All 24 packages installed</span><br /><br />
+                    <span class="output">✔ All 30+ packages installed</span><br /><br />
 
-                    <span class="comment"># 4. Create the index and ingest a document</span><br />
+                    <span class="comment"># 4. Init indexes and ingest a document</span><br />
                     <span class="prompt">$</span> <span class="cmd">python main.py init</span><br />
                     <span class="output">✔ Index 'rag_documents' created (knn_vector, 1024 dim)</span><br />
                     <span class="prompt">$</span> <span class="cmd">python main.py ingest ./documents/sample_document.md</span><br />
-                    <span class="output">✔ Extracted 12 elements → 5 chunks → 5 embeddings indexed</span><br /><br />
+                    <span class="output">✔ Extracted 12 elements → 5 chunks → 5 embeddings indexed</span><br />
+                    <span class="output">✔ Entities extracted: 8 → Neo4j graph updated</span><br />
+                    <span class="output">✔ PII scan: 0 findings, risk level: low</span><br /><br />
 
-                    <span class="comment"># 5. Hybrid search!</span><br />
-                    <span class="prompt">$</span> <span class="cmd">python main.py search "reinforcement learning agent"</span><br />
-                    <span class="output">──────────────────────────────────────────────</span><br />
-                    <span class="output">  <span class="highlight">1.</span> [0.8921] Introduction to Machine Learning</span><br />
-                    <span class="output">     Section: Types of Machine Learning / Reinforcement Learning</span><br />
-                    <span class="output">──────────────────────────────────────────────</span><br />
+                    <span class="comment"># 5. Start the API server & search!</span><br />
+                    <span class="prompt">$</span> <span class="cmd">python -m uvicorn src.api.main:app --reload</span><br />
+                    <span class="output">✔ Uvicorn running on http://localhost:8000</span><br />
+                    <span class="prompt">$</span> <span class="cmd">curl -X POST http://localhost:8000/v1/query \</span><br />
+                    <span class="cmd">  -H "Content-Type: application/json" \</span><br />
+                    <span class="cmd">  -d '{"query": "reinforcement learning", "strategy": "graph"}'</span><br />
+                    <span class="output">{</span><br />
+                    <span class="output">  "results": [{"score": 0.94, "document_title": "ML Intro", ...}],</span><br />
+                    <span class="output">  "retrieval_metrics": {"vector_ms": 45, "graph_ms": 32}</span><br />
+                    <span class="output">}</span><br />
                 </div>
             </div>
         </div>
@@ -594,8 +716,8 @@
 
     <section class="cta-section">
         <div class="container fade-in">
-            <h2>Ready to Build Your <span class="glow-text">RAG Pipeline</span>?</h2>
-            <p>Join the community building production-grade retrieval systems with open-source tools.</p>
+            <h2>Ready to Build Your <span class="glow-text">AI Platform</span>?</h2>
+            <p>Join the community building production-grade retrieval systems with open-source tools. No cloud lock-in.</p>
             <div class="cta-actions">
                 <a href="https://github.com/SemantixRAG/SemantixRAG" target="_blank" class="btn btn-primary">
                     <i class="fab fa-github"></i> Star on GitHub
