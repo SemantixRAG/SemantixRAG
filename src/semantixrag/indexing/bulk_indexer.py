@@ -3,7 +3,7 @@ import logging
 from typing import Iterator
 from opensearchpy.helpers import bulk, streaming_bulk
 
-from config.settings import settings
+from ..config.settings import settings
 from .connection import OpenSearchConnection
 from ..models import Chunk, IndexedDocument
 

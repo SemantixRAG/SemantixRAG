@@ -1,8 +1,8 @@
 """Tests for GraphRAG knowledge graph integration."""
 import pytest
-from src.knowledge.entity_extractor import EntityExtractor
-from src.knowledge.ontology import OntologyManager
-from src.models import ExtractedElement, ElementType
+from semantixrag.knowledge.entity_extractor import EntityExtractor
+from semantixrag.knowledge.ontology import OntologyManager
+from semantixrag.models import ExtractedElement, ElementType
 
 
 @pytest.fixture

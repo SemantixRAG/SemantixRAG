@@ -1,0 +1,188 @@
+[build-system]
+requires = ["setuptools>=70.0", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "semantixrag"
+version = "2.0.0"
+description = "SemantixRAG v2.0 — AI-Native Data Platform with GraphRAG, Compliance, and Observability"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = []
+authors = [
+    {name = "SemantixRAG Team", email = "team@semantixrag.ai"}
+]
+keywords = ["rag", "retrieval-augmented-generation", "langchain", "opensearch", "neo4j", "compliance", "governance"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet",
+]
+
+dependencies = [
+    # Core
+    "python-dotenv==1.0.0",
+    "pydantic==2.5.0",
+    "pydantic-settings==2.1.0",
+    
+    # OpenSearch
+    "opensearch-py==2.4.2",
+    
+    # Neo4j (GraphRAG)
+    "neo4j==5.14.0",
+    
+    # Document Parsing
+    "unstructured[pdf,docx]>=0.14.2",
+    "pdf2image>=1.17.0",
+    "pypdf>=3.17.0",
+    "python-magic>=0.4.27",
+    "markdown>=3.5.0",
+    
+    # Embeddings & ML
+    "sentence-transformers>=2.2.0",
+    "torch>=2.0.0",
+    "transformers>=4.30.0",
+    "accelerate>=0.20.0",
+    "bitsandbytes>=0.40.0",
+    
+    # LangChain Integration
+    "langchain-core>=0.1.14",
+    "langchain-community>=0.0.14",
+    
+    # CDC / File Watching
+    "watchdog==3.0.0",
+    
+    # FastAPI (API Server)
+    "fastapi==0.109.0",
+    "uvicorn==0.27.0",
+    "gunicorn==21.2.0",
+    "python-multipart==0.0.6",
+    
+    # Compliance (GuardRail)
+    "presidio-analyzer==2.2.33",
+    "presidio-anonymizer==2.2.33",
+    "spacy==3.7.2",
+    
+    # Utilities
+    "loguru==0.7.2",
+    "tqdm==4.66.1",
+    "numpy==1.26.2",
+    "tenacity==8.2.3",
+    "orjson==3.9.10",
+    
+    # Importlib backport for Python 3.11
+    "importlib-resources>=6.1.0;python_version<'3.12'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "mypy>=1.5.0",
+    "ruff>=0.0.291",
+]
+
+api = [
+    "fastapi==0.109.0",
+    "uvicorn==0.27.0",
+    "gunicorn==21.2.0",
+]
+
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.2.0",
+]
+
+[project.scripts]
+semantixrag = "semantixrag.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/semantixrag"
+Documentation = "https://semantixrag.readthedocs.io"
+Repository = "https://github.com/yourusername/semantixrag"
+"Bug Tracker" = "https://github.com/yourusername/semantixrag/issues"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+semantixrag = [
+    "config/opa/*.rego",
+    "*.html",
+    ".env.example",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_mode = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+line_length = 100
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+asyncio_mode = "auto"
+addopts = "--cov=src/semantixrag --cov-report=html --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/semantixrag"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]

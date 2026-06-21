@@ -1,8 +1,8 @@
 """Tests for Obsidian observability."""
 import pytest
-from src.observability.tracer import Tracer, TraceSpan
-from src.observability.evaluator import RAGEvaluator
-from src.observability.metrics import MetricsCollector, TimerContext
+from semantixrag.observability.tracer import Tracer, TraceSpan
+from semantixrag.observability.evaluator import RAGEvaluator
+from semantixrag.observability.metrics import MetricsCollector, TimerContext
 
 
 @pytest.fixture

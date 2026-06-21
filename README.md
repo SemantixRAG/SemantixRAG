@@ -15,25 +15,35 @@ A production-grade, open-source AI-native data platform featuring end-to-end RAG
 
 ## Platform Overview
 
+### Core Components
+
+| Layer | Components | Features |
+|:---|:---|:---|
+| **API & Auth** | FastAPI + OPA | REST API, Policy Engine, Rate Limiting |
+| **Ingestion Pipeline** | Extraction → Chunking → Embedding → Indexing | Multi-modal, VLM, Whisper, OCR |
+| **Storage** | OpenSearch + Neo4j | Vector DB + Knowledge Graph |
+| **Features** | Obsidian, GuardRail, GraphRAG, AdminCopilot | Tracing, PII Detection, Entity Extraction, Cost Tracking |
+
+### Ingestion Flow
+
 ```
-┌────────────────────────────────────────────────────────────────────────────┐
-│                           SemantixRAG Platform v2.0                        │
-├────────────────────────────────────────────────────────────────────────────┤
-│  API Gateway (FastAPI)  ───  OPA Policy Engine ───  AuthZ & Rate Limiting  │
-├────────────────────────────────────────────────────────────────────────────┤
-│  Core Pipeline:                                                            │
-│    Extraction → Chunking → Enrichment → Embedding → Indexing               │
-│       │             │            │            │          │                 │
-│       │  VLM/Whisper│  Header    │  LLM Summ. │  BGE-m3  │  OpenSearch     │
-│       │  Multi-modal│  Splitter  │  Entity    │  JinaCLIP│  Neo4j Graph    │
-│       │             │            │  PII Scan  │  CLAP    │  (GraphRAG)     │
-├────────────────────────────────────────────────────────────────────────────┤
-│  Obsidian    │  GuardRail  │  GraphRAG    │  CostSentinel  │  AdminCopilot │
-│  Tracing     │  PII Detect │  Entity      │  Cost Track    │  NL Admin     │
-│  Metrics     │  Masking    │  KG Write    │  Optimize      │  Auto Config  │
-│  Eval Harness│  DSAR       │  Graph Search│  Budget Guard  │  Reports      │
-└────────────────────────────────────────────────────────────────────────────┘
+Document → VLM/Whisper (multimodal) 
+         → Chunking (header-aware splitting)
+         → Enrichment (summarization + NER)
+         → Embedding (BAAI/bge-m3 + JinaCLIP)
+         → Indexing (OpenSearch k-NN + BM25)
+         → GraphRAG (Neo4j entity linking)
+         → PII Masking (GuardRail)
 ```
+
+### Observability & Compliance
+
+| Subsystem | Functions |
+|:---|:---|
+| **Obsidian** (Tracing) | Distributed tracing, RAG quality metrics, cost attribution |
+| **GuardRail** (Compliance) | PII detection/masking, GDPR DSAR, audit logging |
+| **GraphRAG** (Knowledge) | NER, entity linking, multi-hop traversal, ontologies |
+| **AdminCopilot** (Admin) | Natural-language platform administration |
 
 ## Technology Stack
 

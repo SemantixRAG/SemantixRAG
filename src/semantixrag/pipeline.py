@@ -10,7 +10,7 @@ from datetime import datetime
 from typing import Optional
 import uuid
 
-from config.settings import settings
+from .config.settings import settings
 from .models import ExtractionResult, Chunk, IndexedDocument, CostRecord
 from .extractors import BaseExtractor, UnstructuredExtractor, TableExtractor
 from .extractors.multimodal_extractor import MultiModalExtractor

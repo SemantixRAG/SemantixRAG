@@ -7,7 +7,7 @@ from typing import Callable, Optional
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent, FileCreatedEvent
 
-from config.settings import settings
+from ..config.settings import settings
 
 logger = logging.getLogger(__name__)
 

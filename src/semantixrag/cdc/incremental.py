@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 from typing import Optional
 
-from config.settings import settings
+from ..config.settings import settings
 from ..indexing.bulk_indexer import BulkIndexer
 from ..monitoring.logger import get_logger
 

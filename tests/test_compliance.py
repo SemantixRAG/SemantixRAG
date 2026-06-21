@@ -1,8 +1,8 @@
 """Tests for GuardRail PII compliance."""
 import pytest
-from src.compliance.pii_scanner import PIIScanner
-from src.compliance.masking import MaskingEngine
-from src.compliance.dsar import DSAREngine
+from semantixrag.compliance.pii_scanner import PIIScanner
+from semantixrag.compliance.masking import MaskingEngine
+from semantixrag.compliance.dsar import DSAREngine
 
 
 @pytest.fixture

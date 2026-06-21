@@ -5,7 +5,7 @@ from opensearchpy import OpenSearch, RequestsHttpConnection
 from opensearchpy.exceptions import ConnectionError as OpenSearchConnectionError
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from config.settings import settings
+from ..config.settings import settings
 
 logger = logging.getLogger(__name__)
 

@@ -13,11 +13,11 @@ import argparse
 import logging
 from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add src to path for proper imports
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from config.settings import settings
-from src import IngestionPipeline, setup_logging
+from semantixrag.config.settings import settings
+from semantixrag import IngestionPipeline, setup_logging
 
 
 def main():

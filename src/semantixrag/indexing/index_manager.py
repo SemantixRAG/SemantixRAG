@@ -3,7 +3,7 @@ import json
 import logging
 from typing import Optional
 
-from config.settings import settings
+from ..config.settings import settings
 from .connection import OpenSearchConnection
 
 logger = logging.getLogger(__name__)
