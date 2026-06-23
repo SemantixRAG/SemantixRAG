@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "semantixrag"
-version = "2.0.0"
+version = "2.0.2"
 description = "SemantixRAG v2.0 — AI-Native Data Platform with GraphRAG, Compliance, and Observability"
 readme = "README.md"
 requires-python = ">=3.11"
