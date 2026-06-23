@@ -4,10 +4,11 @@ Ties together all phases:
   Phase 2: Extraction -> Phase 3: Chunking & Enrichment -> Phase 4: Embedding & Indexing
   Plus P0 features: GraphRAG, Obsidian, GuardRail
 """
+import asyncio
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 import uuid
 
 from .config.settings import settings
@@ -35,6 +36,10 @@ class IngestionPipeline:
 
     Processes documents through extraction, chunking, enrichment,
     embedding, indexing, graph writing, PII scanning, and telemetry.
+
+    Supports concurrent directory processing via ``process_directory``
+    using ``asyncio.gather`` with a configurable semaphore to prevent
+    rate-limit issues on embedding and graph write backends.
     """
 
     def __init__(
@@ -56,7 +61,8 @@ class IngestionPipeline:
         dsar_engine: Optional[DSAREngine] = None,
         multimodal_extractor: Optional[MultiModalExtractor] = None,
         use_mock_summaries: bool = False,
-    ):
+        max_concurrency: int = 4,
+    ) -> None:
         self.extractor = extractor or UnstructuredExtractor()
         self.splitter = splitter or HeaderAwareSplitter(
             max_tokens=settings.chunk_max_tokens,
@@ -72,7 +78,7 @@ class IngestionPipeline:
         self.index_manager = index_manager or IndexManager()
         self.bulk_indexer = bulk_indexer or BulkIndexer()
         self.hybrid_search = hybrid_search or HybridSearch()
-        self.table_extractor = TableExtractor(use_mock=True)
+        self.table_extractor = TableExtractor(use_mock=settings.use_mock_tables)
 
         # P0: GraphRAG
         self.graph_writer = graph_writer or GraphWriter(
@@ -98,16 +104,24 @@ class IngestionPipeline:
         # Multi-modal
         self.multimodal_extractor = multimodal_extractor or MultiModalExtractor()
 
-    def process_document(
+        # Concurrency control for directory processing
+        self._semaphore = asyncio.Semaphore(max_concurrency)
+
+    async def process_document(
         self,
         file_path: Path,
         document_id: Optional[str] = None,
         tenant_id: str = "default",
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Process a single document through the full pipeline.
 
         Extraction -> Chunking -> Enrichment -> Embedding -> Indexing
         + Entity Extraction (GraphRAG) + PII Scan (GuardRail) + Telemetry (Obsidian)
+
+        Execution is wrapped in granular error handling so that a failure
+        in any post-embedding phase (graph write, metadata indexing) does
+        not corrupt the datastores. The returned dict contains
+        ``layer_success`` indicating which layers completed successfully.
 
         Args:
             file_path: Path to the document file.
@@ -115,24 +129,38 @@ class IngestionPipeline:
             tenant_id: Tenant scope for multi-tenancy.
 
         Returns:
-            Dict with processing results.
+            Dict with processing results, including ``layer_success`` and
+            any partial-success metadata.
         """
         if not file_path.exists():
             logger.error(f"File not found: {file_path}")
-            return {"success": False, "error": f"File not found: {file_path}"}
+            return {
+                "success": False,
+                "error": f"File not found: {file_path}",
+                "layer_success": {"vector": False, "graph": False, "metadata": False},
+            }
 
         if document_id is None:
-            from .extractors.unstructured_extractor import UnstructuredExtractor
             document_id = UnstructuredExtractor.generate_document_id(file_path)
 
-        logger.info(f"Processing document: {file_path.name} (id={document_id}, tenant={tenant_id})")
+        logger.info(
+            f"Processing document: {file_path.name} (id={document_id}, tenant={tenant_id})"
+        )
 
         trace_id = str(uuid.uuid4())
 
+        vector_success = False
+        graph_success = False
+        metadata_success = False
+
         try:
             # Phase 2: Extraction
-            with self.tracer.span("document.extraction", trace_id=trace_id,
-                                   document_id=document_id, filename=file_path.name):
+            with self.tracer.span(
+                "document.extraction",
+                trace_id=trace_id,
+                document_id=document_id,
+                filename=file_path.name,
+            ):
                 with TimerContext(metrics_collector, "extraction"):
                     suffix = file_path.suffix.lower()
                     image_exts = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"}
@@ -140,7 +168,9 @@ class IngestionPipeline:
                     video_exts = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
 
                     if suffix in image_exts | audio_exts | video_exts:
-                        extraction = self.multimodal_extractor.extract(file_path, document_id)
+                        extraction = self.multimodal_extractor.extract(
+                            file_path, document_id
+                        )
                     else:
                         extraction = self.extractor.extract(file_path, document_id)
 
@@ -186,12 +216,18 @@ class IngestionPipeline:
                             )
 
             # P0: GraphRAG - Entity Extraction
+            extracted_entities: list[dict[str, Any]] = []
             if settings.entity_extraction_enabled and self.entity_extractor.nlp:
-                with self.tracer.span("knowledge.entity_extraction", trace_id=trace_id):
+                with self.tracer.span(
+                    "knowledge.entity_extraction", trace_id=trace_id
+                ):
                     with TimerContext(metrics_collector, "entity_extraction"):
                         for chunk in chunks:
-                            entities = self.entity_extractor.extract_from_chunk(chunk.chunk_text)
+                            entities = self.entity_extractor.extract_from_chunk(
+                                chunk.chunk_text
+                            )
                             chunk.entities = entities
+                            extracted_entities.extend(entities)
 
             # Phase 4: Embedding
             with self.tracer.span("embedding.generation", trace_id=trace_id):
@@ -200,6 +236,7 @@ class IngestionPipeline:
                     logger.info(f"Generated {len(chunk_vector_pairs)} embeddings")
 
             # Phase 4: Indexing
+            index_result: dict[str, Any] = {"success": 0, "failed": 0, "errors": []}
             with self.tracer.span("indexing.bulk", trace_id=trace_id):
                 with TimerContext(metrics_collector, "indexing"):
                     index_result = self.bulk_indexer.index_chunks(chunk_vector_pairs)
@@ -208,15 +245,22 @@ class IngestionPipeline:
                         f"{index_result.get('failed', 0)} failed"
                     )
 
-            # P0: GraphRAG - Write to Neo4j
+            vector_success = True
+
+            # P0: GraphRAG - Write to Neo4j (unified batched execution)
             if settings.entity_extraction_enabled:
                 with self.tracer.span("knowledge.graph_write", trace_id=trace_id):
                     with TimerContext(metrics_collector, "graph_write"):
-                        for chunk in chunks:
-                            if chunk.entities:
-                                self.graph_writer.write_entities(
-                                    chunk.entities, chunk.chunk_id, tenant_id
-                                )
+                        batch_data = [
+                            {"entities": chunk.entities, "chunk_id": chunk.chunk_id}
+                            for chunk in chunks
+                            if chunk.entities
+                        ]
+                        if batch_data:
+                            await self.graph_writer.write_entities_batch(
+                                batch_data, tenant_id
+                            )
+                        graph_success = True
 
             # Index document metadata
             total_tokens = sum(len(c.chunk_text.split()) for c in chunks)
@@ -236,20 +280,23 @@ class IngestionPipeline:
                 indexed_at=datetime.utcnow().isoformat(),
             )
             self.bulk_indexer.index_document_metadata(indexed_doc)
+            metadata_success = True
 
             # P0: Obsidian - Record telemetry
             metrics_collector.increment("documents.processed")
-            metrics_collector.record_cost(CostRecord(
-                operation="ingestion",
-                model=settings.embedding_model_name,
-                tokens=total_tokens,
-                cost_usd=0.0,
-                compute_seconds=0.0,
-                tenant_id=tenant_id,
-                timestamp=datetime.utcnow().isoformat(),
-            ))
+            metrics_collector.record_cost(
+                CostRecord(
+                    operation="ingestion",
+                    model=settings.embedding_model_name,
+                    tokens=total_tokens,
+                    cost_usd=0.0,
+                    compute_seconds=0.0,
+                    tenant_id=tenant_id,
+                    timestamp=datetime.utcnow().isoformat(),
+                )
+            )
 
-            result = {
+            result: dict[str, Any] = {
                 "success": True,
                 "document_id": document_id,
                 "filename": file_path.name,
@@ -258,47 +305,113 @@ class IngestionPipeline:
                 "indexed_count": index_result.get("success", 0),
                 "failed_count": index_result.get("failed", 0),
                 "total_tokens": total_tokens,
-                "entities_extracted": sum(len(c.entities) for c in chunks),
+                "entities_extracted": len(extracted_entities),
                 "pii_findings": len(pii_findings),
                 "trace_id": trace_id,
+                "layer_success": {
+                    "vector": vector_success,
+                    "graph": graph_success,
+                    "metadata": metadata_success,
+                },
             }
 
             logger.info(f"Successfully processed '{file_path.name}': {result}")
             return result
 
         except Exception as e:
-            logger.exception(f"Failed to process '{file_path.name}': {e}")
+            logger.exception(
+                f"Failed to process '{file_path.name}': {e}"
+            )
+            metrics_collector.increment("documents.failed")
             return {
                 "success": False,
                 "document_id": document_id,
                 "filename": file_path.name,
                 "error": str(e),
                 "trace_id": trace_id,
+                "layer_success": {
+                    "vector": vector_success,
+                    "graph": graph_success,
+                    "metadata": metadata_success,
+                },
             }
 
-    def process_directory(
+    async def _process_document_guarded(
+        self,
+        file_path: Path,
+        tenant_id: str,
+    ) -> dict[str, Any]:
+        """Semaphore-guarded wrapper around ``process_document``."""
+        async with self._semaphore:
+            return await self.process_document(file_path, tenant_id=tenant_id)
+
+    async def process_directory(
         self,
         directory: Path,
-        extensions: set[str] = None,
+        extensions: Optional[set[str]] = None,
         tenant_id: str = "default",
-    ) -> list[dict]:
-        """Process all supported documents in a directory."""
+    ) -> list[dict[str, Any]]:
+        """Process all supported documents in a directory concurrently.
+
+        Files are processed in parallel up to ``self._semaphore`` capacity
+        (configured via ``max_concurrency`` at construction) using
+        ``asyncio.gather``.
+
+        Args:
+            directory: Path to the directory containing documents.
+            extensions: Set of file extensions to process. Defaults to a
+                comprehensive set covering PDF, text, Office, images, audio,
+                and video formats.
+            tenant_id: Tenant scope for multi-tenancy.
+
+        Returns:
+            List of per-document result dicts.
+        """
         if not directory.exists():
             logger.warning(f"Directory not found: {directory}")
             return []
 
         extensions = extensions or {
-            ".pdf", ".txt", ".md", ".docx", ".csv", ".html", ".xml",
-            ".png", ".jpg", ".jpeg", ".gif", ".mp3", ".wav", ".mp4",
+            ".pdf",
+            ".txt",
+            ".md",
+            ".docx",
+            ".csv",
+            ".html",
+            ".xml",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".gif",
+            ".mp3",
+            ".wav",
+            ".mp4",
         }
-        results: list[dict] = []
 
-        for file_path in sorted(directory.iterdir()):
-            if file_path.is_file() and file_path.suffix.lower() in extensions:
-                result = self.process_document(file_path, tenant_id=tenant_id)
-                results.append(result)
+        tasks = [
+            self._process_document_guarded(file_path, tenant_id)
+            for file_path in sorted(directory.iterdir())
+            if file_path.is_file() and file_path.suffix.lower() in extensions
+        ]
 
-        return results
+        raw_results = await asyncio.gather(*tasks, return_exceptions=True)
+        return [self._normalize_result(r) for r in raw_results]
+
+    @staticmethod
+    def _normalize_result(result: Any) -> dict[str, Any]:
+        """Convert ``asyncio.gather`` exception payloads into error dicts."""
+        if isinstance(result, BaseException):
+            logger.error(f"Unhandled exception in directory processing: {result}")
+            return {
+                "success": False,
+                "error": str(result),
+                "layer_success": {
+                    "vector": False,
+                    "graph": False,
+                    "metadata": False,
+                },
+            }
+        return result
 
     def initialize_index(self, force: bool = False) -> bool:
         """Ensure the OpenSearch index exists with the correct mapping."""
@@ -307,12 +420,16 @@ class IngestionPipeline:
             logger.info(f"Index '{settings.opensearch_index}' is ready")
         return True
 
-    async def initialize_graph(self):
+    async def initialize_graph(self) -> None:
         """Initialize Neo4j constraints and indexes."""
         await self.graph_writer.connect()
         await self.graph_writer.create_constraints()
         logger.info("Neo4j graph initialized")
 
-    async def close_graph(self):
+    async def close_graph(self) -> None:
         """Close Neo4j connection."""
         await self.graph_writer.close()
+
+    async def close(self) -> None:
+        """Close all pipeline resources gracefully."""
+        await self.close_graph()

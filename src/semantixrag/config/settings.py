@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     vlm_model_name: str = "llava-hf/llava-1.5-7b-hf"
     whisper_model_name: str = "openai/whisper-base"
 
+    # Table Extraction
+    use_mock_tables: bool = False
+
     # Monitoring / Watching
     watch_directory: str = "./documents"
     watch_recursive: bool = True
