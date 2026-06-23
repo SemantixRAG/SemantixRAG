@@ -107,10 +107,10 @@ docs = [
 semantixrag = "semantixrag.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/semantixrag"
+Homepage = "https://github.com/SemantixRAG/SemantixRAG/tree/PIP-Package"
 Documentation = "https://semantixrag.readthedocs.io"
-Repository = "https://github.com/yourusername/semantixrag"
-"Bug Tracker" = "https://github.com/yourusername/semantixrag/issues"
+Repository = "https://github.com/SemantixRAG/SemantixRAG/tree/PIP-Package"
+"Bug Tracker" = "https://github.com/SemantixRAG/SemantixRAG/tree/PIP-Package"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
