@@ -1,4 +1,4 @@
-# SemantixRAG — AI-Native Data Platform (v2.0)
+# SemantixRAG — AI-Native Data Platform (v2.0.2)
 
 [![GitHub](https://img.shields.io/badge/GitHub-SemantixRAG-6c5ce7?style=flat&logo=github)](https://github.com/SemantixRAG/SemantixRAG)
 [![License: MIT](https://img.shields.io/badge/License-MIT-00e676?style=flat)](https://opensource.org/licenses/MIT)
@@ -7,8 +7,11 @@
 
 A production-grade, open-source AI-native data platform featuring end-to-end RAG ingestion, knowledge graph integration (GraphRAG), AI observability (Obsidian), automated compliance (GuardRail), multi-modal extraction, and a REST API server — all running locally with zero cloud dependencies.
 
+Installable via PyPI: `pip install semantixrag`
+
 **🌐 Website:** [semantixrag.github.io](https://SemantixRAG.github.io)  
 **📦 GitHub:** [github.com/SemantixRAG/SemantixRAG](https://github.com/SemantixRAG/SemantixRAG)  
+**📦 PyPI:** [pypi.org/project/semantixrag](https://pypi.org/project/semantixrag/)  
 **📖 License:** MIT
 
 ---
@@ -72,89 +75,79 @@ Document → VLM/Whisper (multimodal)
 | **Testing** | Pytest + pytest-asyncio + pytest-cov (41+ tests) | **NEW** |
 | **CI/CD** | GitHub Actions (lint, test, Trivy, Docker) | **NEW** |
 
-## Project Structure (v2.0)
+## Project Structure (v2.0.2)
 
 ```
 SemantixRAG/
 ├── .github/workflows/
 │   └── ci.yml                      # CI/CD pipeline
-├── config/
+├── src/semantixrag/                 # Python package (PEP 621 src-layout)
 │   ├── __init__.py
-│   ├── settings.py                 # Pydantic settings (enhanced)
-│   └── opa/
-│       ├── access.rego             # RBAC/ABAC policy
-│       ├── masking.rego            # Conditional masking policy
-│       └── audit.rego              # Audit level classification
-├── docker/
-│   ├── docker-compose.yml          # OpenSearch + Neo4j + Redis + OPA
-│   ├── opensearch.yml              # OpenSearch configuration
-│   └── Dockerfile                  # Python app container
-├── documents/
-│   └── sample_document.md
-├── src/
-│   ├── __init__.py
-│   ├── models.py                   # Enhanced Pydantic models
-│   ├── pipeline.py                 # Enhanced orchestrator with P0 features
-│   ├── api/                        # NEW: FastAPI server
-│   │   ├── __init__.py
-│   │   ├── main.py                 # FastAPI entry point
+│   ├── cli.py                       # Global CLI entry point
+│   ├── pipeline.py                  # Enhanced async orchestrator
+│   ├── models.py                    # Pydantic models
+│   ├── resources.py                 # Safe .rego resource loader
+│   ├── config/
+│   │   ├── settings.py              # Pydantic settings
+│   │   └── opa/
+│   │       ├── access.rego
+│   │       ├── masking.rego
+│   │       └── audit.rego
+│   ├── api/
+│   │   ├── main.py                  # FastAPI entry point
 │   │   └── routes/
-│   │       ├── __init__.py
-│   │       ├── ingestion.py        # POST /v1/ingest
-│   │       ├── retrieval.py        # POST /v1/query
-│   │       ├── compliance.py       # POST /v1/compliance/pii/scan, /dsar
-│   │       ├── observability.py    # POST /v1/observability/traces
-│   │       └── admin.py            # POST /v1/admin/query (AdminCopilot)
-│   ├── compliance/                 # NEW: GuardRail
-│   │   ├── __init__.py
-│   │   ├── pii_scanner.py          # Presidio + regex PII detection
-│   │   ├── masking.py              # Dynamic PII masking engine
-│   │   └── dsar.py                 # GDPR DSAR automation
-│   ├── knowledge/                  # NEW: GraphRAG
-│   │   ├── __init__.py
-│   │   ├── entity_extractor.py     # spaCy NER + entity linking
-│   │   └── ontology.py             # Domain ontologies + auto-discovery
-│   ├── observability/              # NEW: Obsidian
-│   │   ├── __init__.py
-│   │   ├── tracer.py               # Distributed tracing
-│   │   ├── evaluator.py            # RAG quality metrics
-│   │   └── metrics.py              # Counters, histograms, cost tracking
+│   │       ├── ingestion.py
+│   │       ├── retrieval.py
+│   │       ├── compliance.py
+│   │       ├── observability.py
+│   │       └── admin.py
+│   ├── compliance/
+│   │   ├── pii_scanner.py
+│   │   ├── masking.py
+│   │   └── dsar.py
+│   ├── knowledge/
+│   │   ├── entity_extractor.py
+│   │   └── ontology.py
+│   ├── observability/
+│   │   ├── tracer.py
+│   │   ├── evaluator.py
+│   │   └── metrics.py
 │   ├── extractors/
-│   │   ├── __init__.py
 │   │   ├── base.py
 │   │   ├── unstructured_extractor.py
 │   │   ├── table_extractor.py
-│   │   └── multimodal_extractor.py # NEW: VLM + Whisper + video
+│   │   └── multimodal_extractor.py
 │   ├── chunking/
-│   │   ├── __init__.py
 │   │   ├── header_splitter.py
 │   │   └── enricher.py
 │   ├── embeddings/
-│   │   ├── __init__.py
 │   │   └── embedder.py
 │   ├── indexing/
-│   │   ├── __init__.py
 │   │   ├── connection.py
 │   │   ├── index_manager.py
 │   │   ├── bulk_indexer.py
 │   │   ├── hybrid_search.py
-│   │   └── graph_writer.py         # NEW: Neo4j async writer
+│   │   └── graph_writer.py
 │   ├── cdc/
-│   │   ├── __init__.py
 │   │   ├── watcher.py
 │   │   └── incremental.py
 │   └── monitoring/
-│       ├── __init__.py
 │       └── logger.py
 ├── tests/
-│   ├── test_knowledge.py           # NEW: 11 GraphRAG tests
-│   ├── test_compliance.py          # NEW: 12 GuardRail tests
-│   └── test_observability.py       # NEW: 18 Obsidian tests
-├── main.py                         # CLI entry point
-├── requirements.txt                # Enhanced dependencies
-├── .env.example                    # Enhanced config template
-├── README.md
-└── index.html                      # Project landing page (v2.0)
+│   ├── test_knowledge.py
+│   ├── test_compliance.py
+│   └── test_observability.py
+├── documents/
+│   └── sample_document.md
+├── docker/
+│   ├── docker-compose.yml
+│   ├── opensearch.yml
+│   └── Dockerfile
+├── pyproject.toml                   # PEP 621 build configuration
+├── main.py                          # Backwards-compatible CLI shim
+├── requirements.txt                 # Pinned dependencies (also in pyproject.toml)
+├── .env.example
+└── README.md
 ```
 
 ## Quick Start
@@ -183,24 +176,38 @@ This starts all platform services:
 ### 3. Install Python Dependencies
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate    # Windows
-# source .venv/bin/activate  # Linux/Mac
+# Option A: Install from PyPI (recommended)
+pip install semantixrag
 
-pip install -r requirements.txt
+# Option B: Install from source
+git clone https://github.com/SemantixRAG/SemantixRAG.git
+cd SemantixRAG
+pip install -e .
+
+# With optional extras
+pip install -e ".[dev]"     # Development tools (pytest, ruff, mypy)
+pip install -e ".[api]"     # FastAPI server dependencies
+pip install -e ".[docs]"    # Documentation build tools
 ```
 
 ### 4. Initialize Indexes
 
 ```bash
-python main.py init
+# Using the installed CLI
+semantixrag init
+
+# Or via Python
+python -m semantixrag.cli init
 ```
 
 ### 5. Ingest Documents
 
 ```bash
-python main.py ingest ./documents/sample_document.md
-python main.py ingest ./documents/
+# Single file
+semantixrag ingest ./documents/sample_document.md
+
+# Directory (concurrent, async)
+semantixrag ingest ./documents/
 ```
 
 Directory ingestion runs concurrently (default: 4 workers) using `asyncio.gather` with semaphore-controlled concurrency to prevent rate-limit issues on embedding and graph backends.
@@ -208,14 +215,14 @@ Directory ingestion runs concurrently (default: 4 workers) using `asyncio.gather
 ### 6. Search
 
 ```bash
-python main.py search "machine learning"
-python main.py search "reinforcement learning" --top-k 10
+semantixrag search "machine learning"
+semantixrag search "reinforcement learning" --top-k 10
 ```
 
 ### 7. Start API Server
 
 ```bash
-python -m uvicorn src.api.main:app --reload
+python -m uvicorn semantixrag.api.main:app --reload
 ```
 
 Now you can query via REST:
@@ -229,6 +236,9 @@ curl -X POST http://localhost:8000/v1/query \
 ### 8. Run Tests
 
 ```bash
+# Install dev extras first
+pip install -e ".[dev]"
+
 python -m pytest tests/ -v
 ```
 
@@ -241,6 +251,15 @@ python -m pytest tests/ -v
 | `watch <dir>` | Watch a directory for file changes (CDC) with auto-reindex |
 | `search <query>` | Search indexed documents with hybrid retrieval |
 | `stats` | Show index statistics |
+
+The CLI is registered in `pyproject.toml` as:
+
+```toml
+[project.scripts]
+semantixrag = "semantixrag.cli:main"
+```
+
+After `pip install semantixrag`, the `semantixrag` command is available globally.
 
 **Ingestion Result Tracking:** Each processed document returns a JSON result with `layer_success` indicating which layers completed:
 - `vector`: OpenSearch indexing
