@@ -30,11 +30,17 @@ A production-grade, open-source AI-native data platform featuring end-to-end RAG
 Document → VLM/Whisper (multimodal) 
          → Chunking (header-aware splitting)
          → Enrichment (summarization + NER)
-         → Embedding (BAAI/bge-m3 + JinaCLIP)
-         → Indexing (OpenSearch k-NN + BM25)
-         → GraphRAG (Neo4j entity linking)
+         → Embedding (BAAI/bge-m3 + JinaCLIP) — async batching
+         → Indexing (OpenSearch k-NN + BM25) — atomic layer tracking
+         → GraphRAG (Neo4j batched entity writes) — async, unified payload
          → PII Masking (GuardRail)
 ```
+
+**Production Features:**
+- **Async-native pipeline**: `process_document` and `process_directory` are fully async, preventing blocking on I/O-bound embedding and graph operations.
+- **Concurrent directory processing**: `process_directory` uses `asyncio.gather` with a configurable semaphore (`max_concurrency`) to process multiple documents in parallel without overwhelming rate-limited backends.
+- **Batched graph writes**: Entities from all chunks are collected into a single payload and written to Neo4j via `write_entities_batch`, replacing per-chunk sequential network calls.
+- **Granular fault tolerance**: Each pipeline layer (vector, graph, metadata) tracks success independently. If the graph write fails after OpenSearch indexing succeeds, the system logs the exact failure state, updates metrics, and returns a partial-success result without corrupting datastores.
 
 ### Observability & Compliance
 
@@ -197,6 +203,8 @@ python main.py ingest ./documents/sample_document.md
 python main.py ingest ./documents/
 ```
 
+Directory ingestion runs concurrently (default: 4 workers) using `asyncio.gather` with semaphore-controlled concurrency to prevent rate-limit issues on embedding and graph backends.
+
 ### 6. Search
 
 ```bash
@@ -229,10 +237,17 @@ python -m pytest tests/ -v
 | Command | Description |
 |:---|:---|
 | `init` | Initialize OpenSearch index with k-NN mapping |
-| `ingest <path>` | Ingest a document or directory with entity extraction + PII scan |
+| `ingest <path>` | Ingest a document or directory with entity extraction + PII scan (async, concurrent for directories) |
 | `watch <dir>` | Watch a directory for file changes (CDC) with auto-reindex |
 | `search <query>` | Search indexed documents with hybrid retrieval |
 | `stats` | Show index statistics |
+
+**Ingestion Result Tracking:** Each processed document returns a JSON result with `layer_success` indicating which layers completed:
+- `vector`: OpenSearch indexing
+- `graph`: Neo4j entity/relationship writes
+- `metadata`: Document metadata indexing
+
+This enables partial-success handling and precise failure diagnosis in production.
 
 ## API Endpoints
 
@@ -262,6 +277,7 @@ python -m pytest tests/ -v
 ### 🕸️ GraphRAG — Knowledge Graph Integration
 - Automatic named entity recognition via spaCy at ingestion time
 - Entity linking: chunks → entities via `MENTIONS` relationships in Neo4j
+- **Batched entity writes**: All chunk entities are collected into a unified payload and written to Neo4j in a single batched operation (`write_entities_batch`), eliminating per-chunk sequential network round-trips
 - Entity resolution and coreference grouping
 - Multi-hop Cypher traversal: `search_related_entities(names, hops=2)`
 - Domain ontologies: general, healthcare, legal, finance with auto-discovery
@@ -330,12 +346,11 @@ All settings configurable via `.env` file (prefix `RAG_`):
 | `RAG_ENTITY_EXTRACTION_ENABLED` | `True` | Enable NER at ingestion |
 | `RAG_ENTITY_CONFIDENCE_THRESHOLD` | `0.8` | Minimum entity confidence |
 
-### Cost Sentinel
+### Table Extraction
 
 | Variable | Default | Description |
 |:---|:---|:---|
-| `RAG_COST_TRACKING_ENABLED` | `True` | Enable cost tracking |
-| `RAG_COST_ALERT_THRESHOLD_USD` | `100.0` | Alert threshold |
+| `RAG_USE_MOCK_TABLES` | `False` | Use mock table extractor (no VLM required) |
 
 ## Risk Mitigations
 
@@ -346,9 +361,11 @@ All settings configurable via `.env` file (prefix `RAG_`):
 | Orphaned chunks | Contextual enrichment (title+summary in every chunk) |
 | Indexing bottlenecks | Batch processing, `_bulk` API, async |
 | Neo4j connection failure | Graceful degradation — pipeline continues without graph |
+| Partial sync failure | Granular `layer_success` tracking prevents corrupt state |
 | PII false positives | Tunable confidence threshold; human-in-the-loop |
 | LLM API failure | Circuit breaker pattern with exponential backoff |
 | Embedding model unavailable | Graceful fallback to zero vectors |
+| Rate limits | Concurrent directory processing with configurable semaphore |
 
 ## Testing
 

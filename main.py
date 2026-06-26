@@ -8,6 +8,7 @@ Usage:
     python main.py search <query>           # Search indexed documents
     python main.py stats                    # Show index statistics
 """
+import asyncio
 import sys
 import argparse
 import logging
@@ -139,7 +140,7 @@ def _handle_ingest(pipeline, args, logger):
 
     if path.is_dir():
         logger.info(f"Ingesting all documents from '{path}'...")
-        results = pipeline.process_directory(path)
+        results = asyncio.run(pipeline.process_directory(path))
         success_count = sum(1 for r in results if r.get("success"))
         logger.info(
             f"Ingested {success_count}/{len(results)} documents "
@@ -152,7 +153,7 @@ def _handle_ingest(pipeline, args, logger):
 
     elif path.is_file():
         logger.info(f"Ingesting document '{path}'...")
-        result = pipeline.process_document(path)
+        result = asyncio.run(pipeline.process_document(path))
         if result.get("success"):
             logger.info(
                 f"✓ Ingested '{path.name}': "
@@ -180,13 +181,13 @@ def _handle_watch(pipeline, args, logger):
     def on_created(file_path):
         logger.info(f"[CDC] New file detected: {file_path.name}")
         document_id = UnstructuredExtractor.generate_document_id(file_path)
-        pipeline.process_document(file_path, document_id)
+        asyncio.run(pipeline.process_document(file_path, document_id))
 
     def on_modified(file_path):
         logger.info(f"[CDC] File modified: {file_path.name}")
         document_id = UnstructuredExtractor.generate_document_id(file_path)
         incremental.before_reindex(file_path, document_id)
-        pipeline.process_document(file_path, document_id)
+        asyncio.run(pipeline.process_document(file_path, document_id))
 
     def on_deleted(file_path):
         logger.info(f"[CDC] File deleted: {file_path.name}")

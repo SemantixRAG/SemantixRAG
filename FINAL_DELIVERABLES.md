@@ -102,7 +102,45 @@ SemantixRAG/
 
 ---
 
-### 3. **Import System Refactoring (Complete Replacement Map)**
+### 3. **Production Pipeline Hardening**
+
+**File:** `src/semantixrag/pipeline.py`
+
+#### Async/Await Modernization
+- `process_document`: `def` → `async def`
+- `process_directory`: `def` → `async def`
+- All `graph_writer` interactions now properly awaited
+- CLI (`cli.py`, `main.py`) updated to call async methods via `asyncio.run()`
+
+#### Batched Graph Writes (Bottleneck Fix)
+- Replaced per-chunk sequential `write_entities()` loop with unified `write_entities_batch(batch_data, tenant_id)`
+- Eliminates N blocking Neo4j network calls per document; replaced with 1 batched call
+
+#### Concurrent Directory Processing
+- `process_directory` uses `asyncio.gather(*tasks, return_exceptions=True)`
+- `asyncio.Semaphore(max_concurrency=4)` prevents rate-limit saturation
+- Single document failure no longer blocks batch processing
+
+#### Granular Fault Tolerance
+- Added `layer_success` dict to every result:
+  ```json
+  {"vector": true, "graph": true, "metadata": true}
+  ```
+- Prevents datastore corruption when one layer fails after another succeeds
+- Metrics updated: `documents.processed` vs `documents.failed`
+
+#### Config-Driven Mock Tables
+- Added `RAG_USE_MOCK_TABLES` setting (default: `False`)
+- Removed hardcoded `TableExtractor(use_mock=True)` from `__init__`
+- Production-ready: mock mode is now opt-in via configuration
+
+#### Interrupt Safety
+- `_normalize_result` catches `Exception` instead of `BaseException`
+- `KeyboardInterrupt` and `SystemExit` propagate correctly during batch runs
+
+---
+
+### 4. **Import System Refactoring (Complete Replacement Map)**
 
 **Test Files (3 updated):**
 ```python
@@ -140,7 +178,7 @@ from .config.settings import settings  # Relative imports
 
 ---
 
-### 4. **Safe Resource Loading for .rego Files**
+### 5. **Safe Resource Loading for .rego Files**
 
 **File:** `src/semantixrag/resources.py` (120+ lines)
 
@@ -179,7 +217,7 @@ masking_policy = get_rego_policy('masking.rego')
 
 ---
 
-### 5. **Global CLI Entry Point**
+### 6. **Global CLI Entry Point**
 
 **File:** `src/semantixrag/cli.py` (300+ lines)
 
@@ -209,7 +247,7 @@ $ semantixrag stats
 
 ---
 
-### 6. **Supporting Configuration Files**
+### 7. **Supporting Configuration Files**
 
 #### A. `MANIFEST.in`
 Ensures package data is included in distributions:

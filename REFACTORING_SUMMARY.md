@@ -388,7 +388,67 @@ recursive-include tests *.py
 
 ---
 
-**Refactoring Status:** ✅ COMPLETE  
-**Version:** SemantixRAG v2.0.0  
-**Date:** June 21, 2026  
-**Ready for PyPI:** YES
+## 🔄 Additional Pipeline Refactoring (Post-PyPI)
+
+### Async/Await Pipeline Modernization
+
+**File:** `src/semantixrag/pipeline.py`
+
+| Change | Detail |
+|--------|--------|
+| `process_document` | Converted from `def` to `async def` |
+| `process_directory` | Converted from `def` to `async def` |
+| Graph writes | `await self.graph_writer.write_entities_batch(...)` replaces per-chunk sequential calls |
+| CLI integration | `cli.py` and `main.py` updated to call async methods via `asyncio.run()` |
+
+### Batched Graph Writes (Neo4j Bottleneck Fix)
+
+**Problem:** The original pipeline looped sequentially over every chunk, making individual blocking Neo4j network calls.
+
+**Fix:** All entities are now collected into a unified `batch_data` payload and written via a single `write_entities_batch(batch_data, tenant_id)` call.
+
+### Concurrent Directory Processing
+
+**File:** `src/semantixrag/pipeline.py`
+
+- `process_directory` now uses `asyncio.gather(*tasks, return_exceptions=True)`
+- A configurable `asyncio.Semaphore(max_concurrency=4)` prevents rate-limit issues on embedding/graph backends
+- Failures in one document do not block processing of others
+
+### Granular Fault Tolerance
+
+Every pipeline execution now returns `layer_success`:
+
+```json
+{
+  "layer_success": {
+    "vector": true,
+    "graph": true,
+    "metadata": true
+  }
+}
+```
+
+- If OpenSearch indexing succeeds but Neo4j fails, the result shows `vector: true, graph: false`
+- Metrics are updated appropriately (`documents.processed` vs `documents.failed`)
+- No partial state is left unaccounted for
+
+### Config-Driven Table Extraction Mock
+
+**File:** `src/semantixrag/config/settings.py`
+
+- Added `use_mock_tables: bool = False`
+- `pipeline.py` now instantiates `TableExtractor(use_mock=settings.use_mock_tables)`
+- Removed hardcoded production mock (`use_mock=True`) from the constructor
+
+### Interrupt Safety Fix
+
+**File:** `src/semantixrag/pipeline.py`
+
+- `_normalize_result` now catches `Exception` instead of `BaseException`
+- `KeyboardInterrupt` and `SystemExit` propagate correctly during directory batch runs
+
+---
+
+**Last Updated:** June 26, 2026  
+**Status:** Production hardened ✅
