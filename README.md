@@ -7,7 +7,7 @@
 
 A production-grade, open-source AI-native data platform featuring end-to-end RAG ingestion, knowledge graph integration (GraphRAG), AI observability (Obsidian), automated compliance (GuardRail), multi-modal extraction, and a REST API server — all running locally with zero cloud dependencies.
 
-**🌐 Website:** [semantixrag.github.io](https://SemantixRAG.github.io)  
+**🌐 Website:** [https://semantixrag.github.io/SemantixRAG/](https://semantixrag.github.io/SemantixRAG/)  
 **📦 GitHub:** [github.com/SemantixRAG/SemantixRAG](https://github.com/SemantixRAG/SemantixRAG)  
 **📖 License:** MIT
 
